@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "baselineDate": "2026-10-31",
+  "provenance": "Hashes record the checked-in bundle; upstream byte-for-byte identity has not been independently verified.",
+  "components": {
+    "rive": {
+      "package": "@rive-app/webgl2",
+      "version": "2.49.0",
+      "upstream": "https://github.com/rive-app/rive-wasm"
+    },
+    "astc": {
+      "version": "5.4.0",
+      "revision": "3ee54d103ca66a5b1f751ad49a4b8064235e2cf9",
+      "upstream": "https://github.com/ARM-software/astc-encoder"
+    },
+    "lzfse": {
+      "revision": "e634ca58b4821d9f3d560cdc6df5dec02ffc93fd",
+      "upstream": "https://github.com/lzfse/lzfse"
+    },
+    "emscripten": {
+      "version": "6.0.13",
+      "upstream": "https://github.com/emscripten-core/emsdk"
+    }
+  },
+  "files": {
+    "public/tools/rive-viewer/vendor/rive.js": "abe9dda86ab90382f565ce3cc6fbd458be549dbfcd26df1218480db5bb48793f",
+    "public/tools/rive-viewer/vendor/rive.wasm": "82f763d767447c97c76321d978c4bbbbe7908adc5d7a83a2c408251ebd82aa77",
+    "public/tools/rive-viewer/vendor/LICENSE.txt": "8a1efa755d19446b51a18e1c15f6308728da0b36283c4d38050698ad6954b69a",
+    "public/tools/rive-viewer/vendor/optimizer/encoder.js": "38f46256af8d484156bc25ecfa14763142c329d30b0f600b7d4c16f6f5c5c297",
+    "public/tools/rive-viewer/vendor/optimizer/encoder.wasm": "37a67cb36b6b4a9d29e26dea2a703de7c81ff4b60e55abcb2949dcf49a33df9e",
+    "public/tools/rive-viewer/vendor/optimizer/encoder.d.ts": "2cc9337d4b68a3ea4dc1f6d4ced1bd453e2a2e581c719fe7357859086db30f9b",
+    "public/tools/rive-viewer/vendor/optimizer/ASTC-LICENSE.txt": "494accc32e50eb523a0e384d0ae6d4b702db867a89d6971216760e92b240ee12",
+    "public/tools/rive-viewer/vendor/optimizer/LZFSE-LICENSE.txt": "2a20082c2219edbbdb2e862a0566ba4f762a564ade7c04b09250ae4464bc4b32",
+    "tools/rive-optimizer-wasm/bridge.cpp": "20c5da35e51d212aefd4d9ef86ef5d8607913e99b6c79992e2a134a7f7b7bf0c",
+    "tools/rive-optimizer-wasm/Dockerfile": "da2266a6d962cfb7ac06acccbdab76ef12f3b457a7f0df7f11e1807d94c3a4f1"
+  }
+}

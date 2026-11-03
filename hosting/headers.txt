@@ -1,0 +1,7 @@
+Apply these response headers to /rive-viewer/ and every resource below it, including worker scripts.
+
+Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'self'
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+X-Frame-Options: SAMEORIGIN
+Permissions-Policy: camera=(), microphone=(), geolocation=()

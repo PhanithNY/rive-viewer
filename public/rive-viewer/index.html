@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Preview .riv files and optimize their textures locally in your browser. Your files stay on your device. No uploads. No file collection.">
+  <base href="/rive-viewer/">
+  <title>Rive Local — Inspect .riv properties | PhanithNY</title>
+  <meta property="og:title" content="Rive Local — Browser file viewer">
+  <meta property="og:description" content="Preview Rive files and optimize textures on your device. No uploads. No file collection.">
+  <meta property="og:type" content="website">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <link rel="icon" href="data:,">
+  <script src="theme.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="inspector.css">
+  <script src="vendor/rive.js" defer></script>
+  <script src="optimizer.js" defer></script>
+  <script src="package-loader.js" defer></script>
+  <script src="playback-loader.js" defer></script>
+  <script src="inspector-core.js" defer></script>
+  <script src="inspector.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">r.</span><div>Rive <span class="muted">Local</span><small>LOCAL RIVE FILE INSPECTOR</small></div></div>
+    <div class="header-actions"><label class="theme-control" for="theme">Theme<select id="theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label><button id="open" class="primary">Open file <kbd>⌘ O</kbd></button></div>
+  </header>
+  <main>
+    <section class="workspace" aria-label="Animation preview">
+      <div class="workspace-bar"><div class="file-heading"><span class="file-icon" aria-hidden="true">◇</span><div><h1 id="filename">No file open</h1><p id="filemeta">A little space to bring your animations to life.</p></div></div><span id="playback-status" class="state-label">READY WHEN YOU ARE</span></div>
+      <div id="stage" class="stage" data-background="grid">
+        <canvas id="canvas" aria-label="Interactive Rive animation preview" hidden></canvas>
+        <div id="empty" class="empty-state">
+          <div class="drop-icon" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none"><path d="M20 8h18l12 12v34H14V8h6Z" stroke="currentColor" stroke-width="2"/><path d="M38 8v13h12M25 36l7-7 7 7M32 29v16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="eyebrow">YOUR FILES NEVER LEAVE THIS BROWSER</span>
+          <h2>Drop it. Play it.</h2>
+          <p>Drop a <strong>.riv</strong>, optimized package, or ZIP<br>and explore what’s inside.</p>
+          <button id="browse" class="primary">Choose a file <span aria-hidden="true">↗</span></button>
+          <span class="empty-note">Runs locally. No uploads. No file collection.</span>
+        </div>
+        <div id="drop-overlay" class="drop-overlay" hidden><span>Release to preview</span><small>One .riv file at a time</small></div>
+        <div id="loading" class="loading" role="status" hidden><span class="spinner"></span><span id="loading-label">Opening your animation…</span></div>
+        <div class="stage-caption" aria-hidden="true"><span>RIVE PREVIEW</span><span id="dimensions">LOCAL CANVAS</span></div>
+      </div>
+      <div class="transport">
+        <div class="playback-controls"><button id="play" class="play-button" disabled aria-label="Play animation">▶</button><button id="restart" class="icon-button" disabled aria-label="Restart animation" title="Restart">↺</button><span id="track-label">Nothing playing yet</span></div>
+        <button id="optimize" class="optimize-action" disabled aria-describedby="optimization-note" title="Create a custom ASTC package for a compatible app loader">GPU Optimize ↗</button>
+        <a id="optimized-download" class="optimize-action" download="rive-optimized.zip" hidden>Download ZIP ↓</a>
+      </div>
+      <section id="now-playing" class="now-playing" aria-label="Now playing" hidden>
+        <div class="now-playing-heading"><h2>Now playing</h2><span id="now-status">Stopped</span><button id="now-properties" type="button" disabled>Inspect live properties ↗</button></div>
+        <dl class="now-playing-grid"><div><dt>Artboard</dt><dd id="now-artboard">—</dd></div><div><dt>State machines</dt><dd id="now-machines">—</dd></div><div><dt>Animations</dt><dd id="now-animations">—</dd></div><div><dt>Live View Model</dt><dd id="now-model">—</dd></div></dl>
+        <div id="now-states-row" class="now-states"><span title="The latest reported transitions, not a full list of active layers">Latest state changes</span><strong id="now-states">No transitions reported yet</strong></div>
+      </section>
+      <div id="optimization-status" class="optimization-status" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+      <div id="message" class="message" role="status" aria-live="polite" hidden></div>
+      <details id="advanced-tools" class="advanced-tools" hidden><summary>Advanced</summary>
+        <details id="now-visibility" class="playback-details"><summary>Playback details</summary><p>State names are the latest reported transitions. Internal animation names, active layers and blend weights are not exposed by this runtime.</p></details>
+        <details class="optimization-details"><summary>Texture optimization <span>Optional · runs locally</span></summary><p id="optimization-note" class="optimization-note">Optimize runs on your device. No uploads. Up to 40 MiB. Supports 64 images at 1024×1024, or up to 128 smaller embedded WebP images within the same total pixel budget. Maximum 4096 pixels per side. Large exports need more memory. The custom ASTC package requires a compatible app loader.</p></details>
+        <details class="events-panel"><summary>Events <span id="event-count">0</span><span id="event-state">No transitions yet</span></summary><div class="events-toolbar"><input id="event-filter" type="search" aria-label="Filter events" placeholder="Filter events…"><button id="clear-events" type="button">Clear</button></div><ol id="event-list"><li class="hint">Interact with the preview to see transitions and events.</li></ol></details>
+      </details>
+    </section>
+    <aside id="inspector" class="inspector" aria-label="Animation controls">
+      <div class="privacy-note"><span aria-hidden="true">⌁</span><p><strong class="privacy-promise">No uploads. No file collection.</strong><span class="privacy-quip">Storage is expensive. Your files are none of my business.</span></p></div>
+      <div class="inspector-body" tabindex="0" role="region" aria-label="Inspector settings">
+      <details class="composition-settings"><summary>Canvas &amp; composition</summary>
+      <section class="inspector-section"><h3>CANVAS</h3><label for="fit">Fit mode</label><select id="fit" autocomplete="off"><option value="Contain">Fit inside</option><option value="Cover">Fill canvas</option><option value="ScaleDown">Scale down only</option><option value="None">Actual size</option></select></section>
+      <section class="inspector-section"><h3>COMPOSITION</h3><label for="artboard">Artboard</label><select id="artboard" disabled><option>Open a file first</option></select><label for="track">Playback</label><select id="track" disabled><option>No animation selected</option></select><p class="hint">State machines respond to your pointer and the inputs below.</p></section>
+      </details>
+      <section class="inspector-section properties-section"><div class="section-title"><h3>PROPERTIES</h3><span id="property-count">0 properties</span></div>
+        <div class="artboard-relationship" aria-label="Artboard and View Model relationship"><span class="relationship-label">ASSIGNED IN FILE</span><p id="artboard-connection">Open a file to see its artboard connections.</p><p id="preview-connection" class="hint" hidden></p><details id="artboard-map" hidden><summary>All artboard connections <span id="artboard-connection-count">0</span></summary><ul id="artboard-connections"></ul><p class="hint">Select an artboard to preview it. Nested View Models remain inside its property tree.</p></details></div>
+        <div class="inspection-scope" role="group" aria-label="Inspection scope"><button id="inspect-live" type="button" aria-pressed="true" disabled>Live preview</button><button id="inspect-file" type="button" aria-pressed="false" disabled>File View Models <span id="model-count" title="Unique View Model definitions in the file">0</span></button></div>
+        <p id="live-model" class="live-model">No file open</p>
+        <div id="file-model-field" class="file-model-field" hidden><label for="model-select">View Model</label><select id="model-select" disabled><option value="">No file open</option></select><p class="hint">Each model is listed once. The live preview is separate.</p></div>
+        <label for="instance-select">Instance</label><select id="instance-select" disabled><option>No instance selected</option></select>
+        <div class="binding-toolbar"><span id="binding-status">No file open</span><button id="use-instance" type="button" hidden disabled>Use in preview</button></div>
+        <div class="property-toolbar"><input id="property-search" type="search" placeholder="Find a property or type…" aria-label="Search properties" disabled><button id="reset-values" type="button" disabled>Reset values</button></div>
+        <p id="inspector-notice" class="inspector-notice" role="status" hidden></p>
+        <div id="watch-list" class="watch-list" aria-label="Pinned properties" hidden></div>
+        <div id="inputs"><p class="hint">Open a file to inspect its properties.</p></div>
+      </section>
+      <section class="inspector-section handoff-section"><h3>DESIGNER HANDOFF</h3><p class="hint">Export property names, types, enum choices and initial values. Your file stays on this device.</p><div class="report-actions"><select id="report-format" aria-label="Report format"><option value="json">JSON</option><option value="markdown">Markdown</option></select><button id="download-report" type="button" disabled>Download report ↓</button></div>
+        <details class="compare-panel"><summary>Compare with a previous export</summary><p class="hint">Compare the loaded file against an older .riv. Checks the exported property contract, not visual differences.</p><button id="compare-open" type="button" disabled>Choose previous .riv</button><div id="compare-result" role="status" aria-live="polite"></div></details>
+        <details class="inspector-options"><summary>Inspector width</summary><label for="inspector-width">Panel width</label><input id="inspector-width" type="range" min="300" max="600" value="380"></details>
+      </section>
+      </div>
+    </aside>
+  <footer><span><a href="https://phanithny.com/" class="home-link">← PhanithNY</a> · Independent utility, powered by Rive.</span><span class="runtime-credit">Rive WebGL2 <span class="muted">2.49.0</span><span class="footer-dot">·</span>Built for local playback</span></footer>
+  </main>
+
+  <input id="file-input" type="file" accept=".riv,.lzfse,.zip" hidden>
+  <input id="compare-file" type="file" accept=".riv" hidden>
+</body>
+</html>
